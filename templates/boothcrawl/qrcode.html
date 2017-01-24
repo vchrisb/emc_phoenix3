@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_css %}
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row row-content">
+    <div id="qrdiv" class="col-sm-6">
+		<div class="row">
+			Updating in:
+			<strong><span id='updatingIn'></span></strong>
+		</div>
+		<div class="row">	
+			<canvas id="qr"></canvas>
+		</div>
+		<div class="row">	
+			<a id='url' href=""></a>
+		</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/qrious.min.js' %}"></script>
+<script src="{% static 'js/totp.js' %}"></script>
+<script src="{% static 'js/sha1.js' %}"></script>
+    <script>
+	/* function to limit the resize events */
+	(function() {
+    var throttle = function(type, name, obj) {
+        obj = obj || window;
+        var running = false;
+        var func = function() {
+            if (running) { return; }
+            running = true;
+             requestAnimationFrame(function() {
+                obj.dispatchEvent(new CustomEvent(name));
+                running = false;
+            });
+        };
+        obj.addEventListener(type, func);
+    };
+
+    /* init - you can init any event */
+    throttle("resize", "optimizedResize");
+    })();
+	
+	/* function to generate the QR code */
+	var generateqr = function() {
+	    /*console.log("Generating new QR code"); */
+	    var qrdiv = document.getElementById('qrdiv').getBoundingClientRect();
+		var otp = "{{ request.scheme }}://{{ request.get_host }}/boothcrawl/crawl/" + "{{ badge_uuid }}" + "/" + totpObj.getOTP("{{ secret_key }}") + "/"
+		$('#url').text(otp);
+		document.getElementById("url").setAttribute('href', otp);
+        const qr = new QRious({
+          element: document.getElementById('qr'),
+          value: otp,
+		  level: 'H',
+		  size: qrdiv.width * 0.9
+        })
+    };
+	
+	function timer(){
+		var epoch = Math.round(new Date().getTime() / 1000.0);
+		var countDown = 30 - (epoch % 30);
+		if (epoch % 30 == 0) generateqr();
+		$('#updatingIn').text(countDown);
+		
+	}
+	
+	/* inital drawing when page loads */
+	var autoqr;
+	var totpObj = new TOTP();
+	function startAutoQR() {
+		generateqr();
+		autoqr = window.setInterval(timer, 1000);
+	}
+	function stopAutoQR() {
+		window.clearInterval(autoqr);
+	}
+
+	window.addEventListener('focus', startAutoQR);    
+	window.addEventListener('blur', stopAutoQR);
+
+	/* redraw whenever the window resizes */
+	window.addEventListener("optimizedResize", function() {
+      generateqr();
+	});
+	/* inital drawing when page loads */
+	startAutoQR();
+    </script>
+{% endblock %}

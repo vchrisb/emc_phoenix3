@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% load markdown_filter %}
+<!-- Main component for a primary marketing message or call to action -->
+{% block content %}
+<!-- Main header  -->
+<div id="feature-area" class="hidden-xs hidden-sm" style="background-image: url({% static 'img/phoenix_home_hdr.jpg' %})">
+  <div class="feature-container">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-6 feature-content">
+          <div class="feature-content-inner clearfix" style="background: url({% static 'img/bg_feature_area.png' %}); padding: 10px;">
+            <img src="{% static 'img/townhall_header.png' %}" class="img-responsive">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="feature-area" class="visible-xs-block visible-sm-block" style="background-image: url({% static 'img/phoenix_home_hdr_mobile.jpg' %})">
+  <div class="feature-container">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-6 feature-content">
+          <div class="feature-content-inner clearfix" style="background: url({% static 'img/bg_feature_area.png' %}); padding: 10px;">
+            <img src="{% static 'img/townhall_header_s.png' %}" class="img-responsive">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Marketing messaging and featurettes
+    ================================================== -->
+<!-- Wrap the rest of the page in another container to center all the content. -->
+
+<div class="container marketing">
+  {% if user.is_authenticated %}
+  <!-- Three columns of text below the carousel -->
+  <div class="row">
+    <div class="col-lg-4">
+      <img class="img-circle" src="{% static 'img/gallery.jpg' %}" alt="Zeitplan" width="140" height="140">
+      <h2>Galerie</h2>
+      <p>Hier findet ihr die Galerie mit allen Bildern aus den Tweets</p>
+      <p><a class="btn btn-default" href="{% url 'tweetgallery' %}" role="button">weitere Details &raquo;</a></p>
+    </div><!-- /.col-lg-4 -->
+    <div class="col-lg-4">
+      <img class="img-circle" src="{% static 'img/image_app.jpg' %}" alt="EMC Ready" width="140" height="140">
+      <h2>Feed</h2>
+      <p>Hier findet ihr einen Feed in dem ihr tweeten könnt. Außerdem wird der Twitter stream live auf die Hashtags #EMCPhoenix3 und #RiseofEnt überwacht. Diese Tweets werden in die App geladen.</p>
+      <p><a class="btn btn-default" href="{% url 'tweet' %}" role="button">weitere Details &raquo;</a></p>
+    </div><!-- /.col-lg-4 -->
+    <div class="col-lg-4">
+      <img class="img-circle" src="{% static 'img/emc_ready.jpg' %}" alt="Generic placeholder image" width="140" height="140">
+      <h2>Booth Crawl</h2>
+      <p>Macht mit beim Booth Crawl! Dazu müsst ihr nur an jedem Stand den ihr besucht habe, den QR code scannen. Hier findet ihr eine Liste mit allen erreichten Badges.</p>
+      <p><a class="btn btn-default" href="{% url 'badges' %}" role="button">weitere Details &raquo;</a></p>
+    </div><!-- /.col-lg-4 -->
+  </div><!-- /.row -->
+  <hr class="featurette-divider">
+  {% endif %}
+
+  <!-- START THE FEATURETTES -->
+
+  {% for featurette in featurettes %}
+    {% if featurette.privacy == 'public' or featurette.privacy == 'private' and user.is_authenticated or featurette.privacy == 'public_only' and not user.is_authenticated %}
+      <div class="row featurette">
+        <div class="col-md-7{% if forloop.counter|divisibleby:2 %} col-md-push-5{% endif %}">
+          <h2 class="featurette-heading">{{ featurette.heading }}</h2>
+          <p class="lead">{{ featurette.content|markdownify|safe }}</p>
+        </div>
+        <div class="col-md-5{% if forloop.counter|divisibleby:2 %} col-md-pull-7{% endif %}">
+          <img class="featurette-image img-responsive center-block" src="{{ featurette.image.url }}">
+        </div>
+      </div>
+
+      <hr class="featurette-divider">
+    {% endif %}
+  {% endfor %}
+  <!-- /END THE FEATURETTES -->
+
+</div><!-- /.container -->
+
+{% endblock %}

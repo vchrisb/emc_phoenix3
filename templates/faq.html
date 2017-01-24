@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load markdown_filter %}
+{% block content %}
+<div class="container">
+  <div class="row row-content">
+    <h1>FAQ</h1>
+    <br>
+    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+      {% for faq in faqs %}
+        {% if faq.privacy == 'public' or faq.privacy == 'private' and user.is_authenticated or faq.privacy == 'public_only' and not user.is_authenticated %}
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab" id="heading{{forloop.counter}}">
+                <h4 class="panel-title">
+                  <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{forloop.counter}}" aria-expanded="false" aria-controls="collapse{{forloop.counter}}">
+                    {{ faq.question }}
+                  </a>
+                </h4>
+              </div>
+              <div id="collapse{{forloop.counter}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{forloop.counter}}">
+                <div class="panel-body">
+                  {{ faq.answer|markdownify|safe }}
+                </div>
+              </div>
+            </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

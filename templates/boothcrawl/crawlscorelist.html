@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_css %}
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row row-content">
+    <div class="row">
+		<h1> The winner is: <strong>{{ crawl_winner.user__first_name }} {{ crawl_winner.user__last_name }} </strong></h1>
+    </div>
+	<div class="row">
+		<table class="table table-striped">
+			<thead>
+			  <tr>
+				<th>Firstname</th>
+				<th>Lastname</th>
+			  </tr>
+			</thead>
+			<tbody>
+			{% for crawl in CrawledBadgeList %}
+			  <tr>
+				<td>{{ crawl.user__first_name }}</td>
+				<td>{{ crawl.user__last_name }}</td>
+			  </tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+  </div>
+</div>
+{% endblock %}

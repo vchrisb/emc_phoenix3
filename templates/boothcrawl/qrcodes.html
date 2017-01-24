@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_css %}
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row row-content">
+	<div class="col-xs-12 col-sm-4 col-sm-offset-4 col-md-4 col-md-offset-4 col-lg-4 col-lg-offset-4">
+	{% for badge in badges %}
+		<a href="{% url 'qrcode' badge.id %}"><img class="thumb" src="{{ badge.image.url }}"></a>
+	{% endfor %}
+	</div>
+  </div>
+</div>
+{% endblock %}

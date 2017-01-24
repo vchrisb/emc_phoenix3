@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% load markdown_filter %}
+{% block head_title %}Tweet{% endblock %}
+
+{% block head_css %}
+<link href="{% static 'css/timeline.css' %}" rel="stylesheet">
+<link href="{% static 'css/magnific-popup.css' %}" rel="stylesheet">
+<link href="{% static 'font-awesome/4.7.0/css/font-awesome.min.css' %}" rel="stylesheet"">
+<script src="//twemoji.maxcdn.com/twemoji.min.js?2.2.3"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row row-content">
+    <div class="col-sm-3 col-md-3">
+        {% if form %}
+        {% crispy form %}
+        {% endif %}
+    </div>
+    <div class="col-sm-9 col-md-9">
+      <ul id="tweets" class="timeline">
+      {% for tweet in tweets %}
+        {% if forloop.counter|divisibleby:2 %}
+        <li class="tweet">
+        {% else %}
+        <li class="tweet timeline-inverted">
+        {% endif %}
+          <div class="timeline-badge {% if tweet.from_twitter %}info{% else %}success{% endif %}"><i class="fa {% if tweet.from_twitter %}fa-twitter{% else %}fa-user{% endif %}"></i></div>
+          <div class="timeline-panel">
+            <div class="timeline-heading">
+              <strong class="timeline-title" display="inline">{% if tweet.user %}{{ tweet.user.get_full_name }}{% else %}{{ tweet.username }}{% endif %}</strong><span><small> {% if tweet.user %}{{ tweet.user}}{% else %}<a href="https://twitter.com/{{tweet.screenname}}" target="_blank">@{{ tweet.screenname }}</a>{% endif %}</small></span>
+              <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> {{ tweet.created_at|timesince }} ago {% if tweet.from_twitter %}<a href="https://twitter.com/{{tweet.screenname}}/status/{{ tweet.twitter_id }}" target="_blank">via Twitter</a>{% endif %}</small></p>
+            </div>
+            <div class="timeline-body">
+              <p>{{ tweet.text|urlify|safe }}</p>
+              {% for tweetpic in tweet.pics.all %}
+                <br>
+                <a class="image-popup-vertical-fit" href="{% url 'tweetpic' tweetpic.id %}?size=large"><img src="{{ tweetpic.pic_medium.url }}" class="img-responsive"></img></a>
+              {% endfor %}
+            </div>
+          </div>
+        </li>
+      {% endfor %}
+      </ul>
+      <div id="pagination" class="text-center">
+      <nav>
+        <ul class="pagination">
+          {% if tweets.has_previous %}
+          <li>
+            <a href="?page={{ tweets.previous_page_number }}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          {% endif %}
+          {% if tweets.number|add:"-2" > 0 %}
+          <li><a href="?page={{ tweets.number|add:"-2" }}">{{ tweets.number|add:"-2" }}</a></li>
+          {% endif %}
+          {% if tweets.number|add:"-1" > 0 %}
+          <li><a href="?page={{ tweets.number|add:"-1" }}">{{ tweets.number|add:"-1" }}</a></li>
+          {% endif %}
+          <li class="active"><a href="?page={{ tweets.number }}">{{ tweets.number }}</a></li>
+          {% if tweets.number|add:"1" <= tweets.paginator.num_pages %}
+          <li><a href="?page={{ tweets.number|add:"1" }}">{{ tweets.number|add:"1" }}</a></li>
+          {% endif %}
+          {% if tweets.number|add:"2" <= tweets.paginator.num_pages %}
+          <li><a href="?page={{ tweets.number|add:"2" }}">{{ tweets.number|add:"2" }}</a></li>
+          {% endif %}
+          {% if tweets.has_next %}
+          <li>
+            <a href="?page={{ tweets.next_page_number }}" aria-label="Next" class="next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block javascript %}
+<script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+<script src="{% static 'js/jquery-ias.min.js' %}"></script>
+<script>
+window.onload = function() {
+
+  // Set the size of the rendered Emojis
+  // This can be set to 16x16, 36x36, or 72x72
+  twemoji.size = '16x16';
+
+  // Parse the document body and
+  // insert <img> tags in place of Unicode Emojis if OS is Windows
+  if (window.navigator.userAgent.indexOf("Windows NT 6.1") != -1) twemoji.parse(document.body);
+
+  }
+</script>
+<script type="text/javascript">
+  $(document).ready(function() {
+
+    $('.image-popup-vertical-fit').magnificPopup({
+      type: 'image',
+      closeOnContentClick: true,
+      mainClass: 'mfp-img-mobile',
+      disableOn: function() {
+        if( $(window).width() < 600 ) {
+          return false;
+        }
+          return true;
+        },
+      image: {
+        verticalFit: true
+      }
+
+    });
+  });
+</script>
+<script>
+var ias = jQuery.ias({
+  container:  '#tweets',
+  item:       '.tweet',
+  pagination: '#pagination',
+  next:       '.next'
+});
+
+// Add a loader image which is displayed during loading
+ias.extension(new IASSpinnerExtension());
+// Add a text when there are no more pages left to load
+ias.extension(new IASNoneLeftExtension({text: "You reached the end"}));
+</script>
+{% endblock %}

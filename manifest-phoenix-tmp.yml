@@ -1,0 +1,16 @@
+---
+applications:
+- name: phoenix3-tmp
+  memory: 256M
+  command: "bash scripts/migrate.sh"
+  no-route: true
+  instances: 1
+  buildpack: python_buildpack
+  services:
+  - phoenix3_db
+  - phoenix3_ecs
+  - phoenix3_rabbitmq
+  - phoenix3_config
+  - sendgrid
+  env:
+    DISABLE_COLLECTSTATIC: '1'

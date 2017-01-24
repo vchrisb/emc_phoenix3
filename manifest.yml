@@ -1,0 +1,29 @@
+---
+instances: 2
+buildpack: python_buildpack
+services:
+- phoenix3_db
+- phoenix3_ecs
+- phoenix3_rabbitmq
+- phoenix3_config
+- phoenix3_twitter
+- sendgrid
+env:
+  DISABLE_COLLECTSTATIC: '1'
+applications:
+- name: phoenix3
+  host: phoenix3
+  memory: 256M
+  command: null
+- name: phoenix3-celery
+  memory: 1024M
+  command: "celery -A phoenix worker -l info --without-gossip --without-mingle --without-heartbeat"
+  no-route: true
+  health-check-type: none
+- name: phoenix3-twitter-watcher
+  instances: 1
+  memory: 128M
+  buildpack: python_buildpack
+  command: "python manage.py twitter_watcher --keywords EMCPhoenix3 emc_phoenix RiseofEnt"
+  no-route: true
+  health-check-type: none

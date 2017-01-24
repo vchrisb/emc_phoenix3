@@ -69,3 +69,5 @@ envionments.sh
 #django content
 static/
 media/
+
+static_content/

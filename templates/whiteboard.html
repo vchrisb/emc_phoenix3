@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% block head_css %}
+
+<link href="{% static 'css/blueimp-gallery.min.css' %}" rel="stylesheet">
+<link href="{% static 'css/bootstrap-datepicker3.css' %}" rel="stylesheet">
+<style>
+.blueimp-gallery > .description {
+  position: absolute;
+  top: 50px;
+  left: 15px;
+  color: #fff;
+  display: none;
+}
+.blueimp-gallery-controls > .description {
+  display: block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row row-content">
+    <div class="col-sm-4 col-md-4">
+        <h3>Cloud Native Pitch Challenge</h3>
+        <p>Was müsst ihr tun? Ganz einfach! Uploaded bitte für jeden in Q1 gehalten Pitch ein Bild des Whiteboards mit Account-Namen, Datum und einer kurzen Beschreibung des Termins. Fertig!</p>
+        {% if form %}
+        {% crispy form %}
+        {% endif %}
+    </div>
+    <div class="col-sm-8 col-md-8 text-center">
+      <div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls">
+        <div class="slides"></div>
+        <h3 class="title"></h3>
+        <p class="description"></p>
+        <a class="prev">‹</a>
+        <a class="next">›</a>
+        <a class="close">×</a>
+        <a class="play-pause"></a>
+      </div>
+      <div id="links">
+        {% for whiteboard in whiteboards %}
+        <a class="post" href="{% url 'whiteboardimg' whiteboard.id %}?size=large" title="{{ whiteboard.user.get_full_name }}" data-description="{{ whiteboard.account }}: {{ whiteboard.text }}">
+          <img class="thumb" src="{{ whiteboard.img_thumb.url }}">
+        </a>
+        {% endfor %}
+      </div>
+      <div id="pagination" class="text-center">
+        <nav>
+          <ul class="pagination">
+            {% if whiteboards.has_previous %}
+            <li>
+              <a href="?page={{ whiteboards.previous_page_number }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            {% endif %}
+            {% if whiteboards.number|add:"-2" > 0 %}
+            <li><a href="?page={{ whiteboards.number|add:"-2" }}">{{ whiteboards.number|add:"-2" }}</a></li>
+            {% endif %}
+            {% if whiteboards.number|add:"-1" > 0 %}
+            <li><a href="?page={{ whiteboards.number|add:"-1" }}">{{ whiteboards.number|add:"-1" }}</a></li>
+            {% endif %}
+            <li class="active"><a href="?page={{ whiteboards.number }}">{{ whiteboards.number }}</a></li>
+            {% if whiteboards.number|add:"1" <= whiteboards.paginator.num_pages %}
+            <li><a href="?page={{ whiteboards.number|add:"1" }}">{{ whiteboards.number|add:"1" }}</a></li>
+            {% endif %}
+            {% if whiteboards.number|add:"2" <= whiteboards.paginator.num_pages %}
+            <li><a href="?page={{ whiteboards.number|add:"2" }}">{{ whiteboards.number|add:"2" }}</a></li>
+            {% endif %}
+            {% if whiteboards.has_next %}
+            <li>
+              <a href="?page={{ whiteboards.next_page_number }}" aria-label="Next" class="next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      <br>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/blueimp-gallery.min.js' %}"></script>
+<script src="{% static 'js/jquery-ias.min.js' %}"></script>
+<script src="{% static 'js/bootstrap-datepicker.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    $('.dateinput').datepicker({ format: "mm/dd/yyyy", autoclose: true });
+});
+</script>
+<script>
+document.getElementById('links').onclick = function (event) {
+    event = event || window.event;
+    var target = event.target || event.srcElement,
+        link = target.src ? target.parentNode : target,
+        options = { index: link,
+                    event: event,
+                    continuous: false,
+                    onslide: function (index, slide) {
+                        var text = this.list[index].getAttribute('data-description'),
+                            node = this.container.find('.description');
+                        node.empty();
+                        if (text) {
+                            node[0].appendChild(document.createTextNode(text));
+                        }
+                    }
+                  },
+        links = this.getElementsByTagName('a');
+    blueimp.Gallery(links, options);
+};
+
+var ias = jQuery.ias({
+  container:  '#links',
+  item:       '.post',
+  pagination: '#pagination',
+  next:       '.next'
+});
+
+// Add a loader image which is displayed during loading
+ias.extension(new IASSpinnerExtension());
+
+</script>
+
+{% endblock %}

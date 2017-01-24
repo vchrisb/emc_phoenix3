@@ -1,0 +1,47 @@
+language: python
+python:
+- '3.4'
+- '3.5'
+- nightly
+services:
+- postgresql
+- rabbitmq
+- memcached
+env:
+  global:
+  - DATABASE_URL='postgres://postgres:@localhost:/travis_ci_test'
+  matrix:
+  - DJANGO=1.10.5
+  - DJANGO=latest
+matrix:
+  allow_failures:
+  - python: nightly
+install:
+- if [[ "$DJANGO" != "latest" ]] ; then pip install -q Django==$DJANGO; fi
+- pip install -r requirements.txt
+before_script:
+- psql -c 'create database travis_ci_test;' -U postgres
+script:
+- celery -A phoenix worker -l info --detach
+- python manage.py migrate --noinput
+- python manage.py test --noinput
+before_deploy:
+- python manage.py collectstatic --noinput
+deploy:
+  edge: true
+  provider: cloudfoundry
+  username:
+    secure: QfQ7oeS+Oej7kqKT9NzpX29Yrd6ESW3u4THr9huZj2RxYsjWlW5oWA6D0QzW3rc1YuUweqEEjkhWAmj1vpO3ZV2peWmicKAEnKwADXKtoukBZkG3/eLv3OfPBVydOzsqcTcfUlHycrAf038LGjtbZ0rtB/Kb+35bmd3bHvqfylhwkSG2qt88lh7kjGTVvzVEKNcn05gQQ0K1dhClkBB7CEUll6pfUuZdanUWs6lrDEmA2b0ZhtE+9pcmBqqC1Txc6NzyGVj6Tm/0kU5CQxC3c0zHjd/i2GI1aC0Jbi4DSU5J2ObUDqAvx1yYrfrcfWJ3cTZcn6gAYnZ+fPtfL7WXzMyJpxS9f38fbY4dtciKz71gGvfB35OwVxAbUiF5WrPEAjflOYAtnr42VOi7FRne1n0mc4V2HSlOufQrTEQA5KpDE+NaxvLmm/KB2tU6lT2W2YwoIzk9GAcisXgSpoZTbAGqFaKFK1/7Xzg/QmEvJUJJ9Yf6OtBtI9S0naKguYoa2NnLA88Jr7RqKxn+rYPaVc/qpXt7JvB6qSqcYOeHsAvxS1aWhY0/81zDYoh/Vr9hGprqr6pfwv2ov3Prlq0ER16WVKiEWjQvPESQLRO/OtGDPbAxgOm7VAVRh6m66E5PtusEruT+k9IFd1CUKvMYlS0ExIFjiwuaYI7yEkvasrs=
+  password:
+    secure: KAzuSXVBpNqD+FBOEPFkVE2OU/kUFIQ4oPpM2dDnSjwG7IOjLT/96dBm4SFOjnzuKaBhFYwv6cTu2NezFvtVgMDYo9bTvoyIcrNqbzJ9j67eJ+d8RktIOWIKFuQ4pkwjGyzx7h26P8Z7c3ZYMkPLNEpPsh3PyQnUcuTnjun6uBxEnh7GEd2JqpqXdxiqzZu2oNuAORq1F7UvNXkZ3UTmdwH0o3gC2B8AXqokB/FAJ+4MfNkNU6Xd9oKqRpJQJFEtt+fzswALWjrwButugSm4F35DyKGNrXBEMnULsSYuMs+fCMhD/yTfnTXVYLKo+CN2MjqVmuLYrzI1/85Whxlpt33okmlVT06dVLDj1GJ8OX7y6vVOjDzVfjQ8NlduNC+j8ypsoDwXq0UC8APDoRiJveCxoNs09y50Mc6z/osdGoIRZrScHX5IWWtR1Es31A+eougoysLMLqpr+31hnNkxIpcRMAxNri1MXGzftkyqo2P8cPwEq4Y6zxn/qP4afO2HhIS+ytTKPcrfoxfnNWGAJK0aorSMQkREP47NME22zA5Mgiy/79Q3qYkXf+oTWJL9eK+RpLJjwMc0HO0yY4eyHy4pY4iEB0nRgsyY3UWqs1VD4ccSQ3C9cMxR7tYDOjT50Ip/EjFBSYA4QFC8hG8pVZJhFUEF56ildcgRgAwnQQE=
+  api: https://api.run.pivotal.io
+  organization: EVP
+  space: EMC
+  manifest: manifest-travis.yml
+  on:
+    branch: master
+    condition: "$DJANGO = '1.10.5'"
+    python: '3.5'
+notifications:
+  slack:
+    secure: R8t6WPl0jpSJXRsAAFbQvcI9EFj7gsMOjnC/fEzB+F9JlO891at8V0Y7yKLaajyG1salGzeUAGtaBgZ8Q3T3NpC4i290eQj+DseE8eSjH2u+9IlY1eOl+k7LGPQ7gg3leXIp58xmiU4GP+LEyTRG1LaFU5RyXzEdIyGrPBpsWZarIpbJiYunvpeiNOuIE5ctDoKTWgtIMTCTzEgGHV1Q9QaBB7yueXbgEWTHB43aGA5+tughyCfsvqzPRhllT5n8R+vqZawQ07JKHKQLm26+ifxk8wtt+TJARyMG8LKSIm7d0DeROOXPZMqpaG1+zHs3kp+I0Xbk4wblPCaJ5xinLdbqlNn/zGOynove0R/hcFlrvfXonWQkBcg7S71aUaG0oght1TMz0ABGiUMu7Pw2EmeRxFiMuHGBYEwu4LPcQToQSFHp4aS5DyNAed7XfAaehScs8bk7MDirhomZOXYxIu2evlzM0nF/7zAOVcqQA525XaKLaoZKE1gPT0axEcYOnkZIsSoMhNCJKXlBlnZP1c3YfZI8unfHOLh8Ez1IwRdvS/V1j5wzDXxqNtSLFt02i+19ht0TrA4kuW4m/UhFMvDNlsKIlpe/4gsXtgnPs5PHvx0Tuo5e2W+WMcnYytUoa1vce44X/3GHT7cV9+3tAxP7HCBsg3SwGxbRy5nMpIk=

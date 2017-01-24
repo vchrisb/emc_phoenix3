@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% block head_title %}Schedule{% endblock %}
+
+{% block head_css %}
+<link href="{% static 'css/timeline.css' %}" rel="stylesheet">
+<link href="{% static 'font-awesome/4.7.0/css/font-awesome.min.css' %}" rel="stylesheet"">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row row-content">
+    <div class="col-sm-12 col-md-8 col-md-offset-2 col-lg-8 col-lg-offset-2">
+    {% regroup entries by start|date:"d.m.Y" as entries_by_day %}
+    {% for entries_day in entries_by_day %}
+        <h1 class="text-center">{{ entries_day.grouper }}</h1>
+        <ul class="timeline">
+          {% for entry in entries_day.list %}
+            {% if entry.entrygroup|stringformat:"s" == "hospitality" %}
+            <li>
+            {% else %}
+            <li class="timeline-inverted">
+            {% endif %}
+              <div class="timeline-badge timeline-badge-small
+			  {% if entry.entrygroup|stringformat:"s" == "blue" %}primary
+			  {% elif entry.entrygroup|stringformat:"s" == "green" %}success
+			  {% elif entry.entrygroup|stringformat:"s" == "orange" %}warning
+			  {% elif entry.entrygroup|stringformat:"s" == "red" %}danger
+			  {% else %}info
+			  {% endif %}
+			  ">
+			  {{ entry.start|date:"G:i" }}</div>
+              <div class="timeline-panel">
+                <div class="timeline-heading">
+                  <strong class="timeline-title" display="inline">{{ entry.title }}</strong><br>
+                  <span><small class="text-muted"><i class="glyphicon glyphicon-time"></i> {{ entry.get_duration }} minutes</small></span><br>
+                  {% if entry.speaker %}<span><small class="text-muted"><i class="glyphicon glyphicon-user"></i> {{ entry.speaker }}</small></span><br>{% endif %}
+                  {% if entry.entrylocation %}<span><small class="text-muted"><i class="glyphicon glyphicon-map-marker"></i> {{ entry.entrylocation.locationname }}</small></span><br>{% endif %}
+                </div>
+                <div class="timeline-body">
+                  <p>{{ entry.description|linebreaksbr }}</p>
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+    {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

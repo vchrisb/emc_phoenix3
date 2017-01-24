@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_css %}
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row row-content">
+    <div class="well well-small col-xs-12 col-sm-4 col-sm-offset-4 col-md-4 col-md-offset-4 col-lg-4 col-lg-offset-4">
+		<div class="alert alert-{{ status_code }}">
+		{{ status }}
+		</div>
+		<div class="btn-div pull-center">
+		  <a href="{% url 'badges' %}" class="btn btn-primary btn-block" role="button">Go to badges</a>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
