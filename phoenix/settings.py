@@ -138,16 +138,19 @@ CACHES = {
     }
 }
 
+# default URL, will be overwritten by django-storages
+STATIC_URL = "/static/"
+MEDIA_URL = "/media/"
+
 # Load VCAP_SERVICES
 if "VCAP_SERVICES" in os.environ:
     VCAP_SERVICES = json.loads(os.environ['VCAP_SERVICES'])
     for group in VCAP_SERVICES:
         for service in VCAP_SERVICES[group]:
             if "ecs" in service['name']:
-                AWS_S3_HOST = service['credentials']['HOST']
+                AWS_S3_ENDPOINT_URL = service['credentials']['AWS_S3_ENDPOINT_URL']
                 AWS_ACCESS_KEY_ID = service['credentials']['ACCESS_KEY_ID']
                 AWS_SECRET_ACCESS_KEY = service['credentials']['SECRET_ACCESS_KEY']
-                S3_PUBLIC_URL = service['credentials']['PUBLIC_URL']
                 STATIC_BUCKET_NAME = service['credentials']['STATIC_BUCKET']
                 MEDIA_BUCKET_NAME = service['credentials']['MEDIA_BUCKET']
                 SECURE_BUCKET_NAME = service['credentials']['SECURE_BUCKET']
@@ -157,12 +160,7 @@ if "VCAP_SERVICES" in os.environ:
                 STATICFILES_STORAGE = 'phoenix.custom_storages.StaticStorage'
                 DEFAULT_FILE_STORAGE = 'phoenix.custom_storages.MediaStorage'
                 SECURE_FILE_STORAGE = 'phoenix.custom_storages.SecureStorage'
-
-                STATIC_CUSTOM_DOMAIN = '%s/%s' %(S3_PUBLIC_URL,STATIC_BUCKET_NAME)
-                STATIC_URL = "https://%s/" % STATIC_CUSTOM_DOMAIN
-
-                MEDIA_CUSTOM_DOMAIN = '%s/%s' %(S3_PUBLIC_URL,MEDIA_BUCKET_NAME)
-                MEDIA_URL = "https://%s/" % MEDIA_CUSTOM_DOMAIN
+                
                 # django-storages settings
                 AWS_AUTO_CREATE_BUCKET = True
                 AWS_S3_SECURE_URLS = False
@@ -270,9 +268,7 @@ else:
     print("No VCAP_SERVICES loaded!")
     DEBUG = True
     SECRET_KEY = "DEVELOPMENT"
-    STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-    MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     SECURE_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     # custom_storages.py is referenced in migrations

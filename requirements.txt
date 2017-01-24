@@ -1,5 +1,5 @@
 bleach
-boto
+boto3
 celery
 django
 django-allauth
@@ -13,7 +13,7 @@ django-redis
 django-resized
 django-simple-captcha
 djangorestframework
-django-storages-redux
+django-storages
 dj-database-url
 markdown
 mysqlclient
