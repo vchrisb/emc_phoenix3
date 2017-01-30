@@ -6,11 +6,12 @@ from django.contrib.auth.models import User
 from .models import Badge, CrawledBadge
 from guardian.shortcuts import get_objects_for_user
 from django.utils import timezone
-
+from django.contrib.auth.decorators import login_required
 import pyotp
 
 # Create your views here.
 #@specific_verified_email_required(domains=settings.ALLOWED_DOMAINS)
+@login_required
 def qrcode(request, uuid):
     BadgeObj = get_object_or_404(Badge, pk=uuid)
     UserObj = User.objects.get(username=request.user)
@@ -18,12 +19,11 @@ def qrcode(request, uuid):
         return HttpResponseForbidden()
     
     context = {
-        "secret_key": BadgeObj.secret_key,
-        "badge_uuid": BadgeObj.id
+        "BadgeObj": BadgeObj
     }
 
     return render(request, "boothcrawl/qrcode.html", context)
-
+@login_required
 def qrcodes(request):
     BadgeObj = get_objects_for_user(request.user, 'boothcrawl.view_badge_secret', with_superuser=True)    
     context = {

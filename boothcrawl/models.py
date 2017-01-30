@@ -28,3 +28,6 @@ class CrawledBadge(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='crawledbadges')
     badge = models.ForeignKey('Badge', on_delete=models.CASCADE, related_name='crawled')
     achieved_at = models.DateTimeField(default=timezone.now, editable=False)
+    
+    def __str__(self):
+        return str(self.id)

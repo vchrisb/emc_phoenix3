@@ -7,7 +7,7 @@
   <div class="row row-content">
     <div id="qrdiv" class="col-sm-6">
 		<div class="row">
-			Updating in:
+			Updating for {{ BadgeObj.name }} in:
 			<strong><span id='updatingIn'></span></strong>
 		</div>
 		<div class="row">	
@@ -50,7 +50,7 @@
 	var generateqr = function() {
 	    /*console.log("Generating new QR code"); */
 	    var qrdiv = document.getElementById('qrdiv').getBoundingClientRect();
-		var otp = "{{ request.scheme }}://{{ request.get_host }}/boothcrawl/crawl/" + "{{ badge_uuid }}" + "/" + totpObj.getOTP("{{ secret_key }}") + "/"
+		var otp = "{{ request.scheme }}://{{ request.get_host }}/boothcrawl/crawl/" + "{{ BadgeObj.id }}" + "/" + totpObj.getOTP("{{ BadgeObj.secret_key }}") + "/"
 		$('#url').text(otp);
 		document.getElementById("url").setAttribute('href', otp);
         const qr = new QRious({

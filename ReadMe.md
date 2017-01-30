@@ -143,7 +143,7 @@ cf create-service cloudamqp lemur phoenix_rabbitmq
 cf create-service newrelic standard phoenix_newrelic
 cf create-service sendgrid free sendgrid
 
-cf cups phoenix_ecs -p '{"HOST":"object.ecstestdrive.com","ACCESS_KEY_ID":"123456789@ecstestdrive.emc.com","SECRET_ACCESS_KEY":"ABCDEFGHIJKLMNOPQRSTUVWXYZ","PUBLIC_URL":"123456789.public.ecstestdrive.com","STATIC_BUCKET":"static","MEDIA_BUCKET":"public","SECURE_BUCKET":"secure"}'
+cf cups phoenix_ecs -p '{"AWS_S3_ENDPOINT_URL":"https://object.ecstestdrive.com","ACCESS_KEY_ID":"123456789@ecstestdrive.emc.com","SECRET_ACCESS_KEY":"ABCDEFGHIJKLMNOPQRSTUVWXYZ","PUBLIC_URL":"123456789.public.ecstestdrive.com","STATIC_BUCKET":"static","MEDIA_BUCKET":"public","SECURE_BUCKET":"secure"}'
 cf cups phoenix_twitter -p '{"CONSUMER_KEY":"ABCDEFGHIJKLMNOPQRSTUVWXYZ","CONSUMER_SECRET":"ABCDEFGHIJKLMNOPQRSTUVWXYZ","ACCESS_TOKEN":"ABCDEFGHIJKLMNOPQRSTUVWXYZ","ACCESS_TOKEN_SECRET":"ABCDEFGHIJKLMNOPQRSTUVWXYZ"}'
 cf cups phoenix_config -p '{"SECRET_KEY":"ABCDEFGHIJKLMNOPQRSTUVWXYZ","DEBUG":"False","SECURE_SSL_REDIRECT":"True","SENDGRID_API_KEY":"1234567890""DEFAULT_FROM_EMAIL":"noreply@domain.local","DEFAULT_TO_EMAIL":"admin@domain.local","SERVER_EMAIL":"django@domain.local","ADMINS":"[('Admin', 'admin@domain.local')]"}'
 
@@ -159,16 +159,17 @@ cf cups phoenix_mail -p '{"HOST":"smtp.domain.local","USER":"django@domain.local
 
 ##### initial push for database creation
 Script will create a superuser ``admin`` with password ``admin``
-```cf push phoenix --no-route -c "bash scripts/init_db.sh" -i 1```
-
-##### migrate database
-```cf push phoenix-migrate --no-route -c "bash scripts/migrate.sh" -i 1  
-cf delete phoenix-migrate```
-
-##### push app
 ```cf push phoenix```
 
-For a non-disruptive push
+##### migrate database
+```cf run-task phoenix "python manage.py migrate"  --name "migrate"
+cf tasks phoenix```
+
+##### creat superuser
+``` cf run-task phoenix "python scripts/superuser.py"  --name "superuser"
+cf tasks phoenix```
+
+##### For a non-disruptive push
 ```cf rename phoenix phoenix-old
 cf push phoenix
 cf delete phoenix-old --f```
