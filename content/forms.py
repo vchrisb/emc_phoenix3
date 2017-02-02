@@ -9,6 +9,6 @@ class ContactForm(forms.Form):
     captcha = CaptchaField()
 
 class ContactFormSignedIn(forms.Form):
-    full_name = forms.CharField(required = False)
-    email = forms.EmailField()
+    #full_name = forms.CharField(required = False)
+    #email = forms.EmailField()
     message = forms.CharField(widget=forms.Textarea, max_length=370)

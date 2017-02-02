@@ -79,10 +79,14 @@ def contact(request):
         "form": form,
     }
     if form.is_valid():
-        form_email = form.cleaned_data.get("email")
+        if request.user.is_authenticated():
+            form_email = request.user.email
+            form_full_name = request.user.get_full_name()
+        else:
+            form_email = form.cleaned_data.get("email")
+            form_full_name = form.cleaned_data.get("full_name")
+        
         form_message = form.cleaned_data.get("message")
-        form_full_name = form.cleaned_data.get("full_name")
-
 
         subject = 'Site contact form'
         from_email = settings.DEFAULT_FROM_EMAIL

@@ -7,7 +7,7 @@ from django.contrib import messages
 
 class Command(BaseCommand):
 
-    help = 'Starts the twitter watcher'
+    help = 'Resend confirmation email'
 
     def add_arguments(self, parser):
         parser.add_argument('--email',dest='email_address_list', nargs='+', type=str, required=False)
