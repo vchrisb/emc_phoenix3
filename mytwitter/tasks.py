@@ -19,13 +19,22 @@ def save_tweet(tweetobj):
     twitter_id = tweetobj['id']
     username = tweetobj['user']['name']
     screenname = tweetobj['user']['screen_name']
-    text = tweetobj['text']
+    if 'extended_tweet' in tweetobj:
+        print('extended_tweet')
+        text = tweetobj['extended_tweet']['full_text']
+    else:
+        text = tweetobj['text']
     created_at = parse_datetime(tweetobj['created_at'])
     created_at = timezone.make_aware(created_at, timezone=pytz.UTC) #tweets are stored int UTC
 
     image_urls = []
     try:
-        for media in tweetobj['entities']['media']:
+        if 'extended_tweet' in tweetobj:
+            entities = tweetobj['extended_tweet']['entities']['media']
+        else:
+            entities = tweetobj['entities']['media']
+        
+        for media in entities:
             if media['type'] == 'photo':
                 image_urls.append(media['media_url'] + ":large")
                 # cut image url  from tweet text
@@ -34,10 +43,15 @@ def save_tweet(tweetobj):
         pass
         # print("no picture")
         # return  # no picture
+    
+    if len(text) > 140:
+        print('Tweet text still longer than 140 character!')
+        text = tweetobj['text']
 
     # if len(image_urls) < 2:
-    #     print ("less than 2 pictures" + str(len(image_urls)))
-    #     return
+        # print ("less than 2 pictures" + str(len(image_urls)))
+        # return
+        
     # create tweet
     newtweet, created  = Tweet.objects.get_or_create(twitter_id=twitter_id, username=username, screenname=screenname, text=text, created_at=created_at, from_twitter=True)
     if created:

@@ -71,6 +71,7 @@ class Listener(tweepy.StreamListener):
                 logger.debug('skipping - tweet is possibly sensitive')
                 return
         save_tweet.delay(tweet)
+        #save_tweet(tweet)
         logger.debug('new tweet')
 
     def on_error(self, status_code):
