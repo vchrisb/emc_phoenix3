@@ -7,7 +7,7 @@ class AccountAdapter(DefaultAccountAdapter):
         print(email)
         email_base, provider = email.split("@")
         domain, extension = provider.split('.')
-        if not provider in settings.ALLOWED_DOMAINS:
+        if not provider.lower() in settings.ALLOWED_DOMAINS:
             error_text = "Please use a valid %s email address" %(', '.join(settings.ALLOWED_DOMAINS))
             raise forms.ValidationError(error_text)
         return email
