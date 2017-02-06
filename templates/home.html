@@ -40,7 +40,7 @@
 <div class="container marketing">
   {% if user.is_authenticated %}
   <!-- Three columns of text below the carousel -->
-  <div class="row">
+  <div class="row hidden-xs hidden-sm"">
     <div class="col-lg-4">
       <img class="img-circle" src="{% static 'img/gallery.jpg' %}" alt="Zeitplan" width="140" height="140">
       <h2>Galerie</h2>
@@ -60,7 +60,7 @@
       <p><a class="btn btn-default" href="{% url 'badges' %}" role="button">weitere Details &raquo;</a></p>
     </div><!-- /.col-lg-4 -->
   </div><!-- /.row -->
-  <hr class="featurette-divider">
+  <hr class="featurette-divider hidden-xs hidden-sm">
   {% endif %}
 
   <!-- START THE FEATURETTES -->
