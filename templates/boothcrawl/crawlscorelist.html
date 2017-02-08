@@ -5,15 +5,17 @@
 {% block content %}
 <div class="container">
   <div class="row row-content">
-    <div class="row">
 		<h1> The winner is: <strong>{{ crawl_winner.user__first_name }} {{ crawl_winner.user__last_name }} </strong></h1>
-    </div>
-	<div class="row">
+		Total in draw: {{ crawl_winner_nr}} </br>
+		{% with total=CrawledBadgeList.count %}
+		Total participants: {{ total }}
+		{% endwith %}
 		<table class="table table-striped">
 			<thead>
 			  <tr>
 				<th>Firstname</th>
 				<th>Lastname</th>
+				<th>Badges</th>
 			  </tr>
 			</thead>
 			<tbody>
@@ -21,11 +23,11 @@
 			  <tr>
 				<td>{{ crawl.user__first_name }}</td>
 				<td>{{ crawl.user__last_name }}</td>
+				<td>{{ crawl.total }}</td>
 			  </tr>
 			{% endfor %}
 			</tbody>
 		</table>
-	</div>
   </div>
 </div>
 {% endblock %}

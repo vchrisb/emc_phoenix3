@@ -69,17 +69,24 @@ def badges(request):
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count
 import random
+
 @staff_member_required
 def crawl_score_list(request):
     total_badges = Badge.objects.count()
-    CrawledBadgeList = CrawledBadge.objects.all().values('user', 'user__first_name', 'user__last_name').annotate(total=Count('user')).filter(total=total_badges).order_by('user__last_name')
+    #CrawledBadgeList = CrawledBadge.objects.all().values('user', 'user__first_name', 'user__last_name').annotate(total=Count('user')).filter(total=total_badges).order_by('user__last_name')
+    CrawledBadgeList = CrawledBadge.objects.all().values('user', 'user__first_name', 'user__last_name').annotate(total=Count('user')).order_by('-total', 'user__last_name')
     crawl_winner = ''
+    CrawlWinnerCount = 0
+    
     if CrawledBadgeList.exists():
-        randomcrawl = random.randrange(0,CrawledBadgeList.count())
-        crawl_winner = CrawledBadgeList[randomcrawl]
+        CrawledBadgeListWinner = CrawledBadgeList.filter(total=total_badges)
+        CrawlWinnerCount = CrawledBadgeListWinner.count()
+        randomcrawl = random.randrange(0,CrawlWinnerCount)
+        crawl_winner = CrawledBadgeListWinner[randomcrawl]
     
     context = {
         "crawl_winner": crawl_winner,
+        "crawl_winner_nr": CrawlWinnerCount,
         "CrawledBadgeList": CrawledBadgeList
     }
     return render(request, "boothcrawl/crawlscorelist.html", context)
