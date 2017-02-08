@@ -7,19 +7,26 @@ services:
 - phoenix3_rabbitmq
 - phoenix3_config
 - phoenix3_twitter
+- phoenix3_memcached
+- phoenix_newrelic
 - sendgrid
 env:
   DISABLE_COLLECTSTATIC: '1'
+  NEW_RELIC_LOG: 'stdout'
 applications:
 - name: phoenix3
   host: phoenix3
   memory: 256M
   command: null
+  env:
+    NEW_RELIC_APP_NAME: 'phoenix3'
 - name: phoenix3-celery
   memory: 1024M
   command: "celery -A phoenix worker -l info --without-gossip --without-mingle --without-heartbeat"
   no-route: true
   health-check-type: none
+  env:
+    NEW_RELIC_APP_NAME: 'phoenix3-celery'
 - name: phoenix3-twitter-watcher
   instances: 1
   memory: 128M
@@ -27,3 +34,5 @@ applications:
   command: "python manage.py twitter_watcher --keywords EMCPhoenix3 emc_phoenix RiseofEnt"
   no-route: true
   health-check-type: none
+  env:
+    NEW_RELIC_APP_NAME: 'phoenix3-twitter-watcher'
